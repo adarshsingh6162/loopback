@@ -49,7 +49,7 @@
     "inflection": "^1.6.0",
     "isemail": "^2.2.1",
     "loopback-connector-remote": "^3.0.0",
-    "loopback-datasource-juggler": "git://github.com/bitpodio/loopback-datasource-juggler.git#fix-embedded-validation-async",
+    "loopback-datasource-juggler": "git+https://github.com/bitpodio/loopback-datasource-juggler.git#fix-embedded-validation-async",
     "loopback-filters": "^1.0.0",
     "loopback-phase": "^3.0.0",
     "nodemailer": "^2.5.0",
