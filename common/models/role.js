@@ -288,10 +288,10 @@ module.exports = function(Role) {
     if (!(context instanceof AccessContext)) {
       context = new AccessContext(context);
     }
-
+    var orgId = context.remotingContext.req.orgId;
     this.resolveRelatedModels();
 
-    debug('isInRole(): %s', role);
+    debug('isInRole(): role - %s, orgId: %s', role, orgId);
     context.debug();
 
     var resolver = Role.resolvers[role];
@@ -355,15 +355,27 @@ module.exports = function(Role) {
           principalId = principalId.toString();
         }
 
-        if (principalType && principalId) {
-          roleMappingModel.findOne({where: {roleId: roleId,
-              principalType: principalType, principalId: principalId}},
-            function(err, result) {
+        if (principalType && principalId && orgId != null) {
+          debug("RoleMapping filter is %j", {
+              roleId: roleId,
+              principalType: principalType,
+              principalId: principalId,
+              orgId: orgId,
+            })
+          roleMappingModel.findOne({
+            where: {
+              roleId: roleId,
+              principalType: principalType,
+              principalId: principalId,
+              orgId: orgId,
+            }
+          },
+            function (err, result) {
               debug('Role mapping found: %j', result);
               done(!err && result); // The only arg is the result
             });
         } else {
-          process.nextTick(function() {
+          process.nextTick(function () {
             done(false);
           });
         }
