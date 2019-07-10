@@ -289,8 +289,8 @@ module.exports = function(Role) {
       context = new AccessContext(context);
     }
     var orgId = null;
-    if (context.remotingContext && context.remotingContext.req) {
-      orgId = context.remotingContext.req.orgId;
+    if (context.orgId) {
+      orgId = context.orgId;
     }
     this.resolveRelatedModels();
 
