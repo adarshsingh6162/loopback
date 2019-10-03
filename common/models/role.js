@@ -484,5 +484,5 @@ module.exports = function(Role) {
     });
   };
 
-  Role.validatesUniquenessOf('name', { message: 'already exists' });
+  Role.validatesUniquenessOf('name', {ignoreCase: true , message: 'already exists' });
 };
