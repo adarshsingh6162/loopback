@@ -421,56 +421,58 @@ module.exports = function(ACL) {
     var effectiveACLs = [];
     var staticACLs = self.getStaticACLs(model.modelName, property);
 
-    self.find({where: {model: model.modelName, property: propertyQuery,
-      accessType: accessTypeQuery}}, function(err, acls) {
-      if (err) {
-        if (callback) callback(err);
-        return;
-      }
-      var inRoleTasks = [];
+    var inRoleTasks = [];
+    var acls = [{
+            accessType:"*",
+            id: model.modelName,
+            model:model.modelName,
+            permission:"ALLOW",
+            permisssion:"ALLOW",
+            principalId:"$adminparty",
+            principalType:"ROLE",
+            property:"*"
+         }];
+    acls = acls.concat(staticACLs);
 
-      acls = acls.concat(staticACLs);
-
-      acls.forEach(function(acl) {
-        // Check exact matches
-        for (var i = 0; i < context.principals.length; i++) {
-          var p = context.principals[i];
-          var typeMatch = p.type === acl.principalType;
-          var idMatch = String(p.id) === String(acl.principalId);
-          if (typeMatch && idMatch) {
-            effectiveACLs.push(acl);
-            return;
-          }
-        }
-
-        // Check role matches
-        if (acl.principalType === ACL.ROLE) {
-          inRoleTasks.push(function(done) {
-            roleModel.isInRole(acl.principalId, context,
-              function(err, inRole) {
-                if (!err && inRole) {
-                  effectiveACLs.push(acl);
-                }
-                done(err, acl);
-              });
-          });
-        }
-      });
-
-      async.parallel(inRoleTasks, function(err, results) {
-        if (err) {
-          if (callback) callback(err, null);
+    acls.forEach(function(acl) {
+      // Check exact matches
+      for (var i = 0; i < context.principals.length; i++) {
+        var p = context.principals[i];
+        var typeMatch = p.type === acl.principalType;
+        var idMatch = String(p.id) === String(acl.principalId);
+        if (typeMatch && idMatch) {
+          effectiveACLs.push(acl);
           return;
         }
+      }
 
-        var resolved = self.resolvePermission(effectiveACLs, req);
-        if (resolved && resolved.permission === ACL.DEFAULT) {
-          resolved.permission = (model && model.settings.defaultPermission) || ACL.ALLOW;
-        }
-        debug('---Resolved---');
-        resolved.debug();
-        if (callback) callback(null, resolved);
-      });
+      // Check role matches
+      if (acl.principalType === ACL.ROLE) {
+        inRoleTasks.push(function(done) {
+          roleModel.isInRole(acl.principalId, context,
+            function(err, inRole) {
+              if (!err && inRole) {
+                effectiveACLs.push(acl);
+              }
+              done(err, acl);
+            });
+        });
+      }
+    });
+
+    async.parallel(inRoleTasks, function(err, results) {
+      if (err) {
+        if (callback) callback(err, null);
+        return;
+      }
+
+      var resolved = self.resolvePermission(effectiveACLs, req);
+      if (resolved && resolved.permission === ACL.DEFAULT) {
+        resolved.permission = (model && model.settings.defaultPermission) || ACL.ALLOW;
+      }
+      debug('---Resolved---');
+      resolved.debug();
+      if (callback) callback(null, resolved);
     });
   };
 
