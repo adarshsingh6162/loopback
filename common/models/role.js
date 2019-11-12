@@ -337,22 +337,12 @@ module.exports = function(Role) {
     }
 
     var roleMappingModel = this.roleMappingModel;
-    this.findOne({where: {name: role}}, function(err, result) {
-      if (err) {
-        if (callback) callback(err);
-        return;
-      }
-      if (!result) {
-        if (callback) callback(null, false);
-        return;
-      }
-      debug('Role found: %j', result);
 
       // Iterate through the list of principals
       async.some(context.principals, function(p, done) {
         var principalType = p.type || undefined;
         var principalId = p.id || undefined;
-        var roleId = result.id.toString();
+        var roleId = role;
 
         if (principalId !== null && principalId !== undefined && (typeof principalId !== 'string')) {
           principalId = principalId.toString();
@@ -371,7 +361,10 @@ module.exports = function(Role) {
               principalType: principalType,
               principalId: principalId,
               orgId: orgId,
-            }
+            },
+          },
+          {
+            notify : false
           },
             function (err, result) {
               debug('Role mapping found: %j', result);
@@ -386,8 +379,6 @@ module.exports = function(Role) {
         debug('isInRole() returns: %j', inRole);
         if (callback) callback(null, inRole);
       });
-    });
-
   };
 
   /**
