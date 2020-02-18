@@ -59,7 +59,7 @@
     "serve-favicon": "^2.2.0",
     "stable": "^0.1.5",
     "strong-globalize": "^2.6.2",
-    "strong-remoting": "^2.21.0",
+    "strong-remoting": "git+https://github.com/adarshsingh6162/strong-remoting.git#cbeab384d0a2aa6f0302bb34ac883a76055c3ab4",
     "uid2": "0.0.3",
     "underscore.string": "^3.0.3"
   },
